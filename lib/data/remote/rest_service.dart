@@ -54,13 +54,23 @@ class RESTService {
           if (getHeaders() != null) {
             options.headers.addAll(getHeaders());
           }
-          options.extra.addAll(
+          if (forceRefresh) {
+            request.options.extra
+                .update("cached", (value) => value, ifAbsent: () => false);
+          } else {
+            request.options.extra.addAll(
+                buildCacheOptions(Duration(days: 7), forceRefresh: forceRefresh)
+                    .extra);
+            request.options.extra
+                .update("cached", (value) => value, ifAbsent: () => true);
+          }
+          /*options.extra.addAll(
               buildCacheOptions(Duration(days: 7), forceRefresh: forceRefresh)
-                  .extra);
+                  .extra);*/
           options.extra.update("apiCallIdentifier", (value) => value,
               ifAbsent: () => apiCallIdentifier);
-          options.extra
-              .update("cached", (value) => value, ifAbsent: () => true);
+          /*options.extra
+              .update("cached", (value) => value, ifAbsent: () => true);*/
 
           return options; //continue
         }, onError: (DioError e) async {
